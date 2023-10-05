@@ -6,7 +6,7 @@ from datadog_lambda.metric import lambda_metric
 def lambda_handler(event, context):
     # create iam client
     iam = boto3.client("iam")
-    # List account aliases through the pagination interface
+    # List account alias through the pagination interface
     paginator = iam.get_paginator("list_account_aliases")
 
     alias = None
@@ -17,7 +17,7 @@ def lambda_handler(event, context):
     # create cost explorer client
     client = boto3.client("ce")
 
-    # set metric time range
+    # set metric time range between today and 30 days ago
     start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
     end_date = datetime.now().strftime("%Y-%m-%d")
 
@@ -31,7 +31,7 @@ def lambda_handler(event, context):
 
     # emit metric to Datadog as custom metric from serverless function
     lambda_metric(
-        "aws_account.30_day_spend",  # metric name
+        "aws_account.last_month_spend",  # metric name
         total_amount,  # metric value
         tags=["environment: prod", f"aws_account: {alias[0]}"],  # associated tags
     )
