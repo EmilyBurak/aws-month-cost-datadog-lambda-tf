@@ -42,6 +42,8 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_role_attach" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+# could use a better CI/CD process for the lambda itself on S3 or ECR
+# edit .py file locally and reupload for changes for now 
 data "archive_file" "cost_lambda_test_zip" {
   type        = "zip"
   source_dir  = "${path.module}/python/"
@@ -85,7 +87,7 @@ resource "aws_lambda_function" "month_cost_function" {
   environment {
     variables = {
       DD_SITE                      = "datadoghq.com"
-      DD_API_KEY                   = var.dd_api_key
+      DD_API_KEY                   = var.dd_api_key # pass in at runtime or through GH action
       DD_CAPTURE_LAMBDA_PAYLOAD    = "false"
       DD_FLUSH_TO_LOG              = "true"
       DD_MERGE_XRAY_TRACES         = "false"
