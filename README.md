@@ -42,9 +42,11 @@ of the attendant resources is in working stages, triggered by `workflow_dispatch
 
 - Add tags for both AWS and Datadog
 - Set up proper remote state
-- Add DD dashboarding to TF code 
-- Make more modular the time window of the data polled, and/or frequency 
+- Add DD dashboarding to TF code
+- Make more modular the time window of the data polled, and/or frequency
+- Split off all the IAM in `main.tf` into its own module
 
 ## Resources
+
 - https://docs.datadoghq.com/serverless/installation/python/
 - https://spacelift.io/blog/terraform-aws-lambda
