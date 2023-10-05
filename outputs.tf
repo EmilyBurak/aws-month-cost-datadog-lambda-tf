@@ -1,4 +1,4 @@
 
-output "cost_lambda_arn" {
-  value = aws_lambda_function.cost_lambda_test_function.arn
+output "month_cost_lambda_arn" {
+  value = aws_lambda_function.month_cost_function.arn
 }
