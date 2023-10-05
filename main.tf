@@ -50,9 +50,10 @@ data "archive_file" "cost_lambda_test_zip" {
   output_path = "${path.module}/python/cost_lambda_test.zip"
 }
 
+# runs every day, could easily be changed to a different frequency via. rate() expression syntax
 resource "aws_cloudwatch_event_rule" "every_day" {
   name                = "every_day_rule"
-  description         = "trigger cost lambda every day"
+  description         = "meant to trigger a lambda every day"
   schedule_expression = "rate(1 day)"
 }
 
@@ -72,11 +73,11 @@ resource "aws_lambda_permission" "allow_eventbridge" {
 
 resource "aws_lambda_function" "month_cost_function" {
   filename      = "${path.module}/python/cost_lambda_test.zip"
-  function_name = "cost_lambda_test"
+  function_name = "monthly_cost_lambda"
   role          = aws_iam_role.month_cost_lambda.arn
   runtime       = "python3.8"
   depends_on    = [aws_iam_role_policy_attachment.lambda_basic_role_attach, aws_iam_role_policy_attachment.cost_policy_attach]
-  timeout       = 10
+  timeout       = 10 # increases as this is currently running slow for reasons that need to be debugged 
   layers = [
     "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension:49",
     "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Python38:80"
@@ -87,7 +88,7 @@ resource "aws_lambda_function" "month_cost_function" {
   environment {
     variables = {
       DD_SITE                      = "datadoghq.com"
-      DD_API_KEY                   = var.dd_api_key # pass in at runtime or through GH action
+      DD_API_KEY                   = var.dd_api_key # pass in at runtime or through GH action secret
       DD_CAPTURE_LAMBDA_PAYLOAD    = "false"
       DD_FLUSH_TO_LOG              = "true"
       DD_MERGE_XRAY_TRACES         = "false"
