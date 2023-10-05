@@ -2,4 +2,4 @@
 **/*.tfstate.*
 **/.terraform/*
 **/.terraform.lock.hcl
-.env
+cost_lambda_test.zip
