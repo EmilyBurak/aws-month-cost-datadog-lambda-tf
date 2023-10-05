@@ -27,12 +27,12 @@ def lambda_handler(event, context):
         Granularity="MONTHLY",
         Metrics=["UnblendedCost"],
     )
-    total_amount = resp["ResultsByTime"][0]["Total"]["UnblendedCost"]["Amount"]
+    month_amount = resp["ResultsByTime"][0]["Total"]["UnblendedCost"]["Amount"]
 
     # emit metric to Datadog as custom metric from serverless function
     lambda_metric(
         "aws_account.last_month_spend",  # metric name
-        total_amount,  # metric value
+        month_amount,  # metric value
         tags=[f"aws_account: {alias[0]}"],  # associated tag(s)
     )
 
