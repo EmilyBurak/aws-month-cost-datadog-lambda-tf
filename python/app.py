@@ -33,7 +33,7 @@ def lambda_handler(event, context):
     lambda_metric(
         "aws_account.last_month_spend",  # metric name
         total_amount,  # metric value
-        tags=["environment: prod", f"aws_account: {alias[0]}"],  # associated tags
+        tags=[f"aws_account: {alias[0]}"],  # associated tag(s)
     )
 
     return {"statusCode": 200, "body": "success"}
