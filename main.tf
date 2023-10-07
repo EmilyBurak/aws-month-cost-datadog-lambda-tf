@@ -11,6 +11,11 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+data "aws_secretsmanager_secret_version" "dd_api_key" {
+  secret_id = "dd_api_key"
+  
+}
+
 resource "aws_iam_role" "month_cost_lambda" {
   name               = "month_cost_lambda_servicerole"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
@@ -88,7 +93,8 @@ resource "aws_lambda_function" "month_cost_function" {
   environment {
     variables = {
       DD_SITE                      = "datadoghq.com"
-      DD_API_KEY                   = var.dd_api_key # pass in at runtime or through GH action secret
+      DD_API_KEY                   = jsondecode(data.aws_secretsmanager_secret_version.dd_api_key.secret_string)["DD_API_KEY"]
+        # pass in at runtime or through GH action/AWS secret
       DD_CAPTURE_LAMBDA_PAYLOAD    = "false"
       DD_FLUSH_TO_LOG              = "true"
       DD_MERGE_XRAY_TRACES         = "false"
