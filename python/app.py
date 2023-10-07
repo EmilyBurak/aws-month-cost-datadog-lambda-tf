@@ -1,6 +1,7 @@
 import boto3
 from datetime import datetime, timedelta
 from datadog_lambda.metric import lambda_metric
+import os
 
 
 def lambda_handler(event, context):
@@ -23,7 +24,7 @@ def lambda_handler(event, context):
     lambda_metric(
         "aws_account.last_month_spend",  # metric name
         month_amount,  # metric value
-        tags=[f"org: foo"],  # associated tag(s)
+        tags=[f"org: {os.environ.get('ORG')}"],  # associated tag(s)
     )
 
     return {"statusCode": 200, "body": "success"}

@@ -101,6 +101,7 @@ resource "aws_lambda_function" "month_cost_function" {
       DD_TRACE_ENABLED             = "true"
       DD_LAMBDA_HANDLER            = "app.lambda_handler"
       DD_SERVERLESS_APPSEC_ENABLED = "false"
+      ORG = var.organization
     }
   }
   tags = {
