@@ -4,16 +4,6 @@ from datadog_lambda.metric import lambda_metric
 
 
 def lambda_handler(event, context):
-    # create iam client
-    iam = boto3.client("iam")
-    # List account alias through the pagination interface
-    paginator = iam.get_paginator("list_account_aliases")
-
-    alias = None
-
-    for response in paginator.paginate():
-        alias = response["AccountAliases"]
-
     # create cost explorer client
     client = boto3.client("ce")
 
@@ -33,7 +23,7 @@ def lambda_handler(event, context):
     lambda_metric(
         "aws_account.last_month_spend",  # metric name
         month_amount,  # metric value
-        tags=[f"aws_account: {alias[0]}"],  # associated tag(s)
+        tags=[f"org: foo"],  # associated tag(s)
     )
 
     return {"statusCode": 200, "body": "success"}
