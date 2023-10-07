@@ -13,6 +13,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     # currently not working due to lack of ability to reference the state, attempts to create duplicate resources
+    # also won't work due to not passing in organization value
     steps:
       - name: Checkout
         uses: actions/checkout@v4
