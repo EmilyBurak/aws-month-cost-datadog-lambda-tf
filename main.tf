@@ -111,3 +111,25 @@ resource "aws_lambda_function" "month_cost_function" {
     "dd_sls_ci" = "v2.21.1"
   }
 }
+
+
+resource "datadog_dashboard" "last_month_spend_dashboard" {
+  title        = "Last month's AWS Costs For ${var.organization}"
+  description  = "Total unblended costs for the last month of AWS"
+  layout_type  = "ordered"
+
+
+
+  widget {
+    query_value_definition {
+      request {
+        q          = "avg:aws_account.last_month_spend{org:_test-org}"
+        aggregator = "avg"
+      }
+      autoscale   = true
+      title       = "AWS Cost for ${var.organization}"
+      live_span   = "1d"
+    }
+  }
+
+}
