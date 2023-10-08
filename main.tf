@@ -123,8 +123,8 @@ resource "datadog_dashboard" "last_month_spend_dashboard" {
   widget {
     query_value_definition {
       request {
-        q          = "avg:aws_account.last_month_spend{org:_test-org}"
-        aggregator = "avg"
+        q          = "max:aws_account.last_month_spend{org:_test-org}"
+        aggregator = "last"
       }
       autoscale   = true
       title       = "AWS Cost for ${var.organization}"
