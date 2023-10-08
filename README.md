@@ -45,6 +45,7 @@ of the attendant resources is in working stages, triggered by `workflow_dispatch
 - Set up proper remote state
 - Make more modular the time window of the data polled, and/or frequency
 - Split off all the IAM in `main.tf` into its own module
+- Make sure the Datadog query works as intended.
 
 ## Resources
 
