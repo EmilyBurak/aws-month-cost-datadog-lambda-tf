@@ -82,7 +82,7 @@ resource "aws_lambda_function" "month_cost_function" {
   role          = aws_iam_role.month_cost_lambda.arn
   runtime       = "python3.8"
   depends_on    = [aws_iam_role_policy_attachment.lambda_basic_role_attach, aws_iam_role_policy_attachment.cost_policy_attach]
-  timeout       = 10 # increases as this is currently running slow for reasons that need to be debugged 
+  timeout       = 10 # increased as this can hit cold starts
   layers = [
     "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension:49",
     "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Python38:80"
@@ -94,7 +94,6 @@ resource "aws_lambda_function" "month_cost_function" {
     variables = {
       DD_SITE                      = "datadoghq.com"
       DD_API_KEY                   = jsondecode(data.aws_secretsmanager_secret_version.dd_api_key.secret_string)["DD_API_KEY"]
-        # pass in at runtime or through GH action/AWS secret
       DD_CAPTURE_LAMBDA_PAYLOAD    = "false"
       DD_FLUSH_TO_LOG              = "true"
       DD_MERGE_XRAY_TRACES         = "false"
@@ -123,6 +122,7 @@ resource "datadog_dashboard" "last_month_spend_dashboard" {
   widget {
     query_value_definition {
       request {
+        # this query presumes your AWS spend is only going up, which wouldn't be true for the end of month?
         q          = "max:aws_account.last_month_spend{org:_test-org}"
         aggregator = "last"
       }
