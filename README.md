@@ -25,6 +25,7 @@ of the attendant resources is in working stages, triggered by `workflow_dispatch
 
 ## How To Use
 
+- Set up secrets in GitHub repo referenced in `.github/workflows/terraform.yaml`
 - Run Terraform code included with the core TF workflow(`terraform init` --> `terraform plan` --> `terraform apply`)
 - Observe the results in Datadog.
 
