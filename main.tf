@@ -11,6 +11,7 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+# currently rquires this to be provisioned manually 
 data "aws_secretsmanager_secret_version" "dd_api_key" {
   secret_id = "dd_api_key"
   
@@ -25,14 +26,14 @@ resource "aws_iam_role" "month_cost_lambda" {
 data "aws_iam_policy_document" "cost_usage_aliases_policy" {
   statement {
     effect    = "Allow"
-    actions   = ["ce:GetCostAndUsage", "iam:ListAccountAliases"]
+    actions   = ["ce:GetCostAndUsage"]
     resources = ["*"]
   }
 }
 
 resource "aws_iam_policy" "month_cost_lambda_policy" {
   name        = "month_cost_lambda_policy"
-  description = "A policy for the last month's cost polling lambda that allows Cost and Usage and Account Alias listing"
+  description = "A policy for the last month's AWS cost polling lambda that allows Cost and Usage get"
   policy      = data.aws_iam_policy_document.cost_usage_aliases_policy.json
 }
 
