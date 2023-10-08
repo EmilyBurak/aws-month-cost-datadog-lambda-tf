@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "assume_role" {
 # currently rquires this to be provisioned manually 
 data "aws_secretsmanager_secret_version" "dd_api_key" {
   secret_id = "dd_api_key"
-  
+
 }
 
 resource "aws_iam_role" "month_cost_lambda" {
@@ -101,7 +101,7 @@ resource "aws_lambda_function" "month_cost_function" {
       DD_TRACE_ENABLED             = "true"
       DD_LAMBDA_HANDLER            = "app.lambda_handler"
       DD_SERVERLESS_APPSEC_ENABLED = "false"
-      ORG = var.organization
+      ORG                          = var.organization
     }
   }
   tags = {
@@ -114,9 +114,9 @@ resource "aws_lambda_function" "month_cost_function" {
 
 
 resource "datadog_dashboard" "last_month_spend_dashboard" {
-  title        = "Last month's AWS Costs For ${var.organization}"
-  description  = "Total unblended costs for the last month of AWS"
-  layout_type  = "ordered"
+  title       = "Last month's AWS Costs For ${var.organization}"
+  description = "Total unblended costs for the last month of AWS"
+  layout_type = "ordered"
 
 
 
@@ -127,9 +127,9 @@ resource "datadog_dashboard" "last_month_spend_dashboard" {
         q          = "max:aws_account.last_month_spend{org:_test-org}"
         aggregator = "last"
       }
-      autoscale   = true
-      title       = "AWS Cost for ${var.organization}"
-      live_span   = "1d"
+      autoscale = true
+      title     = "AWS Cost for ${var.organization}"
+      live_span = "1d"
     }
   }
 
