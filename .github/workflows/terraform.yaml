@@ -4,17 +4,66 @@ on: workflow_dispatch
 #   push:
 #     branches:
 #       - main
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  DD_API_KEY: ${{ secrets.DD_API_KEY }}
+  DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
+  TF_VAR_organization: ${{ secrets.ORGANIZATION }}
 
 jobs:
+  ecr:
+    name: Setup and deploy to ECR
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.5
+          terraform_wrapper: false
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -target="aws_ecr_repository.cost_lambda_ecr_repo"
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -target="aws_ecr_repository.cost_lambda_ecr_repo"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # personal account role for testing
+          role-to-assume: arn:aws:iam::375063819679:role/GitHubAction-AssumeRole
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: month-cost-lambda-repo
+          # IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./python
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
   terraform:
     name: "Terraform"
     runs-on: ubuntu-latest
+    needs: ecr
+
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      DD_API_KEY: ${{ secrets.DD_API_KEY }}
-      DD_APP_KEY: ${{ secrets.DD_APP_KEY }}
-      TF_VAR_organization: ${{ secrets.ORGANIZATION }}
+      TF_VAR_ecr_image_uri: ${{needs.ecr.outputs.image}}
 
     steps:
       - name: Checkout
