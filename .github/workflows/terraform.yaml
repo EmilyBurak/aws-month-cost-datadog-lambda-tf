@@ -30,11 +30,12 @@ jobs:
       - name: Terraform Init
         id: init
         run: terraform init
+        # this -var stuff is hacky as is -target
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -target="aws_ecr_repository.cost_lambda_ecr_repo"
+        run: terraform plan -no-color -target="aws_ecr_repository.cost_lambda_ecr_repo"  -var 'ecr_image_uri=foo'
       - name: Terraform Apply
-        run: terraform apply -auto-approve -target="aws_ecr_repository.cost_lambda_ecr_repo"
+        run: terraform apply -auto-approve -target="aws_ecr_repository.cost_lambda_ecr_repo" -var 'ecr_image_uri=foo'
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
