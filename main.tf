@@ -124,7 +124,7 @@ resource "datadog_dashboard" "last_month_spend_dashboard" {
     query_value_definition {
       request {
         # this query presumes your AWS spend is only going up, which wouldn't be true for the end of month?
-        q          = "max:aws_account.last_month_spend{org:_test-org}"
+        q          = "max:aws_account.last_month_spend{org:_${var.organization}}"
         aggregator = "last"
       }
       autoscale = true
