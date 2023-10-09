@@ -48,13 +48,18 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_role_attach" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# could use a better CI/CD process for the lambda itself on S3 or ECR
-# edit .py file locally and reupload for changes for now 
-data "archive_file" "cost_lambda_test_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/python/"
-  output_path = "${path.module}/python/cost_lambda_test.zip"
+# data "archive_file" "cost_lambda_test_zip" {
+#   type        = "zip"
+#   source_dir  = "${path.module}/python/"
+#   output_path = "${path.module}/python/cost_lambda_test.zip"
+# }
+
+resource "aws_ecr_repository" "cost_lambda_ecr_repo" {
+    name = "month-cost-lambda-repo" 
 }
+
+# IAM for allowing a user to push to the repo?
+# IAM for creating that user? 
 
 # runs every day, could easily be changed to a different frequency via. rate() expression syntax
 resource "aws_cloudwatch_event_rule" "every_day" {
@@ -77,8 +82,13 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   source_arn    = aws_cloudwatch_event_rule.every_day.arn
 }
 
+# move to vars file if continuing use
+variable "ecr_image_uri" {
+  
+}
+
 resource "aws_lambda_function" "month_cost_function" {
-  filename      = "${path.module}/python/cost_lambda_test.zip"
+  image_uri = var.ecr_image_uri
   function_name = "monthly_cost_lambda"
   role          = aws_iam_role.month_cost_lambda.arn
   runtime       = "python3.8"
