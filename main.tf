@@ -1,51 +1,12 @@
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
-  }
+module "iam" {
+  source = "./iam"
+  lambda_name = "month_cost_lambda"
 }
 
 # currently rquires this to be provisioned manually 
 data "aws_secretsmanager_secret_version" "dd_api_key" {
   secret_id = "dd_api_key"
 
-}
-
-resource "aws_iam_role" "month_cost_lambda" {
-  name               = "month_cost_lambda_servicerole"
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-}
-
-
-data "aws_iam_policy_document" "cost_usage_aliases_policy" {
-  statement {
-    effect    = "Allow"
-    actions   = ["ce:GetCostAndUsage"]
-    resources = ["*"]
-  }
-}
-
-resource "aws_iam_policy" "month_cost_lambda_policy" {
-  name        = "month_cost_lambda_policy"
-  description = "A policy for the last month's AWS cost polling lambda that allows Cost and Usage get"
-  policy      = data.aws_iam_policy_document.cost_usage_aliases_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "cost_policy_attach" {
-  role       = aws_iam_role.month_cost_lambda.name
-  policy_arn = aws_iam_policy.month_cost_lambda_policy.arn
-}
-
-
-resource "aws_iam_role_policy_attachment" "lambda_basic_role_attach" {
-  role       = aws_iam_role.month_cost_lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 # could use a better CI/CD process for the lambda itself on S3 or ECR
@@ -80,9 +41,9 @@ resource "aws_lambda_permission" "allow_eventbridge" {
 resource "aws_lambda_function" "month_cost_function" {
   filename      = "${path.module}/python/cost_lambda_test.zip"
   function_name = "monthly_cost_lambda"
-  role          = aws_iam_role.month_cost_lambda.arn
+  role          = module.iam.lambda_cost_iam_role_arn
   runtime       = "python3.8"
-  depends_on    = [aws_iam_role_policy_attachment.lambda_basic_role_attach, aws_iam_role_policy_attachment.cost_policy_attach]
+  # depends_on    = [aws_iam_role_policy_attachment.lambda_basic_role_attach, aws_iam_role_policy_attachment.cost_policy_attach]
   timeout       = 10 # increased as this can hit cold starts
   layers = [
     "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension:49",
