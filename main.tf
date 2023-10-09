@@ -89,6 +89,8 @@ variable "ecr_image_uri" {
 
 resource "aws_lambda_function" "month_cost_function" {
   image_uri = var.ecr_image_uri
+  # needed as defaults to Zip
+  package_type = "Image"
   function_name = "monthly_cost_lambda"
   role          = aws_iam_role.month_cost_lambda.arn
   runtime       = "python3.8"
