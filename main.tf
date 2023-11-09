@@ -114,23 +114,29 @@ resource "aws_lambda_function" "month_cost_function" {
 
 
 resource "datadog_dashboard" "last_month_spend_dashboard" {
-  title       = "Last month's AWS Costs For ${var.organization}"
+  
+  title       = "Last month's AWS Costs For All Orgs"
   description = "Total unblended costs for the last month of AWS"
   layout_type = "ordered"
-
-
-
-  widget {
+  dynamic "widget" {
+    for_each = toset(var.org_set)
+    
+  content {
     query_value_definition {
       request {
         # this query presumes your AWS spend is only going up, which wouldn't be true for the end of month?
-        q          = "max:aws_account.last_month_spend{org:_${var.organization}}"
+        q          = "max:aws_account.last_month_spend{org:_${widget.value}}"
         aggregator = "last"
       }
       autoscale = true
-      title     = "AWS Cost for ${var.organization}"
+      title     = "AWS Cost for ${widget.value}"
       live_span = "1d"
     }
   }
+  }
+}
 
+variable "org_set" {
+  type = list(string)
+  default = ["test-org1", "test-org2", "test-org3"]
 }
